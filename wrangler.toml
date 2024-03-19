@@ -12,8 +12,4 @@ binding = "AI"
 [[d1_databases]]
 binding = "DB"
 database_name = "llama2"
-database_id = "e24eb37b-6b13-4e84-b1af-63de0dedcc6d"
-
-[[r2_buckets]]
-binding = "R2"
-bucket_name = "share"
+database_id = "50100bde-090c-4cb8-bcf6-e6b6176b6534"

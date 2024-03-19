@@ -4,6 +4,8 @@ import {
 	prettyJSON,
 	addSearchParams,
 	responseToJSON,
+	isInlineQueryUpdate,
+	isMessageUpdate,
 } from "./libs";
 import TelegramApi from "./telegram_api";
 import {
@@ -72,13 +74,13 @@ export default class TelegramBot extends TelegramApi {
 					target_lang: "english",
 				});
 				return new TelegramInlineQueryResultArticle(
-					response.translated_text,
+					response.translated_text ?? "",
 					`${lang}: ${response.translated_text}`
 				);
 			})
 		);
 		return this.answerInlineQuery(
-			update.inline_query?.id ?? 0,
+			isInlineQueryUpdate(update) ? update.inline_query.id : "0",
 			inline_articles
 		);
 	};
@@ -89,20 +91,20 @@ export default class TelegramBot extends TelegramApi {
 		const { success } = await this.db
 			.prepare("DELETE FROM Messages WHERE userId=?")
 			.bind(
-				update.inline_query
+				isInlineQueryUpdate(update)
 					? update.inline_query.from.id
-					: update.message?.from.id
+					: isMessageUpdate(update) ? update.message.chat.id : 0
 			)
 			.run();
 		if (success) {
-			if (update.inline_query) {
+			if (isInlineQueryUpdate(update)) {
 				return this.answerInlineQuery(update.inline_query.id, [
 					new TelegramInlineQueryResultArticle("_"),
 				]);
 			}
-			return this.sendMessage(update.message?.chat.id ?? 0, "_");
+			return this.sendMessage(isMessageUpdate(update) ? update.message.chat.id : 0, "_");
 		}
-		return this.sendMessage(update.message?.chat.id ?? 0, "failed");
+		return this.sendMessage(isMessageUpdate(update) ? update.message.chat.id : 0, "failed");
 	};
 
 	// bot command: /image
@@ -119,7 +121,7 @@ export default class TelegramBot extends TelegramApi {
 		}
 		const inputs = { prompt: _prompt, num_steps: 20 };
 		await this.sendMessage(
-			update.message?.chat.id ?? 0,
+			isMessageUpdate(update) ? update.message.chat.id : 0,
 			"image is processing. please wait..."
 		);
 		const response = await ai.run(
@@ -129,7 +131,7 @@ export default class TelegramBot extends TelegramApi {
 		const id = crypto.randomUUID();
 		await this.r2.put(id, response);
 		const url = "https://r2.seanbehan.ca/" + id;
-		return this.sendPhoto(update.message?.chat.id ?? 0, url);
+		return this.sendPhoto(isMessageUpdate(update) ? update.message.chat.id : 0, url);
 	};
 
 	// bot command: /question
@@ -156,9 +158,9 @@ export default class TelegramBot extends TelegramApi {
 				const { results } = await this.db
 					.prepare("SELECT * FROM Messages WHERE userId=?")
 					.bind(
-						update.inline_query
+						isInlineQueryUpdate(update)
 							? update.inline_query.from.id
-							: update.message?.from.id
+							: isMessageUpdate(update) ? update.message.chat.id : 0
 					)
 					.all();
 				return results;
@@ -179,8 +181,8 @@ export default class TelegramBot extends TelegramApi {
 			"<s>" +
 			[
 				`Your name is ${this.bot_name}.`,
-				`You are talking to ${update.message?.from.first_name}.`,
-				`Your source code is at https://github.com/codebam/cf-workers-telegram-bot .`,
+				`You are talking to ${isMessageUpdate(update) ? update.message.from.first_name : ""}.`,
+				`Your source code is at https://github.com/smhmayboudi/cloudflare-workers-telegram-bot .`,
 				`the current date is ${new Date().toString()}`,
 			].reduce((acc, cur) => {
 				return acc + cur + "\n";
@@ -208,9 +210,9 @@ export default class TelegramBot extends TelegramApi {
 				.prepare("INSERT INTO Messages (id, userId, content) VALUES (?, ?, ?)")
 				.bind(
 					crypto.randomUUID(),
-					update.inline_query
+					isInlineQueryUpdate(update)
 						? update.inline_query.from.id
-						: update.message?.from.id,
+						: isMessageUpdate(update) ? update.message.chat.id : 0,
 					"[INST] " + _prompt + " [/INST]" + "\n" + response
 				)
 				.run();
@@ -224,18 +226,18 @@ export default class TelegramBot extends TelegramApi {
 			return this.question(update, args);
 		} // sometimes llama2 doesn't respond when given lots of system prompts
 
-		if (update.inline_query) {
+		if (isInlineQueryUpdate(update)) {
 			return this.answerInlineQuery(update.inline_query.id, [
 				new TelegramInlineQueryResultArticle(response),
 			]);
 		}
 		return this.sendMessage(
-			update.message?.chat.id ?? 0,
+			isMessageUpdate(update) ? update.message.chat.id : 0,
 			response,
 			"",
 			false,
 			false,
-			update.message?.message_id
+			isMessageUpdate(update) ? update.message.message_id : 0
 		);
 	};
 
@@ -260,9 +262,9 @@ export default class TelegramBot extends TelegramApi {
 				const { results } = await this.db
 					.prepare("SELECT * FROM Messages WHERE userId=?")
 					.bind(
-						update.inline_query
+						isInlineQueryUpdate(update)
 							? update.inline_query.from.id
-							: update.message?.from.id
+							: isMessageUpdate(update) ? update.message.chat.id : 0
 					)
 					.all();
 				return results;
@@ -283,8 +285,8 @@ export default class TelegramBot extends TelegramApi {
 			"<s>" +
 			[
 				`Your name is ${this.bot_name}.`,
-				`You are talking to ${update.message?.from.first_name}.`,
-				`Your source code is at https://github.com/codebam/cf-workers-telegram-bot .`,
+				`You are talking to ${isMessageUpdate(update) ? update.message.from.first_name : ""}.`,
+				`Your source code is at https://github.com/smhmayboudi/cloudflare-workers-telegram-bot .`,
 				`the current date is ${new Date().toString()}`,
 				"Sean Behan is a full stack developer who goes by the username codebam.",
 				"Sean Behan likes programming and video games.",
@@ -317,9 +319,9 @@ export default class TelegramBot extends TelegramApi {
 				.prepare("INSERT INTO Messages (id, userId, content) VALUES (?, ?, ?)")
 				.bind(
 					crypto.randomUUID(),
-					update.inline_query
+					isInlineQueryUpdate(update)
 						? update.inline_query.from.id
-						: update.message?.from.id,
+						: isMessageUpdate(update) ? update.message.chat.id : 0,
 					"[INST] " + _prompt + " [/INST]" + "\n" + response
 				)
 				.run();
@@ -328,30 +330,32 @@ export default class TelegramBot extends TelegramApi {
 			}
 		}
 
-		if (update.inline_query) {
+		if (isInlineQueryUpdate(update)) {
 			return this.answerInlineQuery(update.inline_query.id, [
 				new TelegramInlineQueryResultArticle(response),
 			]);
+		} else if (isMessageUpdate(update)) {
+			return this.sendMessage(
+				update.message.chat.id,
+				response,
+				"",
+				false,
+				false,
+				update.message.message_id
+			);
 		}
-		return this.sendMessage(
-			update.message?.chat.id ?? 0,
-			response,
-			"",
-			false,
-			false,
-			update.message?.message_id
-		);
+		return this.updates.default
 	};
 
 	// bot command: /code
 	code = async (update: TelegramUpdate): Promise<Response> =>
 		((url) =>
-			update.inline_query
+			isInlineQueryUpdate(update)
 				? this.answerInlineQuery(update.inline_query.id, [
 						new TelegramInlineQueryResultArticle(url),
 					])
-				: this.sendMessage(update.message?.chat.id ?? 0, url))(
-			"https://github.com/codebam/cf-workers-telegram-bot"
+				: this.sendMessage(isMessageUpdate(update) ? update.message.chat.id : 0, url))(
+			"https://github.com/smhmayboudi/cloudflare-workers-telegram-bot"
 		);
 
 	// bot command: /duckduckgo
@@ -361,11 +365,11 @@ export default class TelegramBot extends TelegramApi {
 	): Promise<Response> =>
 		((query) =>
 			((duckduckgo_url) =>
-				update.inline_query && query === ""
+				isInlineQueryUpdate(update) && query === ""
 					? this.answerInlineQuery(update.inline_query.id, [
 							new TelegramInlineQueryResultArticle("https://duckduckgo.com"),
 						])
-					: update.inline_query
+					: isInlineQueryUpdate(update)
 						? fetch(
 								addSearchParams(new URL("https://api.duckduckgo.com"), {
 									q: query,
@@ -384,7 +388,7 @@ export default class TelegramBot extends TelegramApi {
 											default_thumb_url = "https://duckduckgo.com/assets/icons/meta/DDG-icon_256x256.png"
 										) =>
 											this.answerInlineQuery(
-												update.inline_query?.id ?? 0,
+												isInlineQueryUpdate(update) ? update.inline_query.id : "0",
 												instant_answer_url !== ""
 													? [
 															new TelegramInlineQueryResultArticle(
@@ -431,7 +435,7 @@ export default class TelegramBot extends TelegramApi {
 										)
 									)
 							)
-						: this.sendMessage(update.message?.chat.id ?? 0, duckduckgo_url))(
+						: this.sendMessage(isMessageUpdate(update) ? update.message.chat.id : 0, duckduckgo_url))(
 				query === ""
 					? "https://duckduckgo.com"
 					: (() => {
@@ -452,11 +456,11 @@ export default class TelegramBot extends TelegramApi {
 			.then((response) => responseToJSON(response))
 			.then((json) =>
 				((message) =>
-					update.inline_query
+					isInlineQueryUpdate(update)
 						? this.answerInlineQuery(update.inline_query.id, [
 								new TelegramInlineQueryResultArticle(message),
 							])
-						: this.sendMessage(update.message?.chat.id ?? 0, message))(
+						: this.sendMessage(isMessageUpdate(update) ? update.message.chat.id : 0, message))(
 					`Kanye says... ${json.quote}`
 				)
 			)
@@ -469,7 +473,7 @@ export default class TelegramBot extends TelegramApi {
 			.then((joke) => joke as Joke)
 			.then((joke_response) =>
 				((message) =>
-					update.inline_query
+					isInlineQueryUpdate(update)
 						? this.answerInlineQuery(
 								update.inline_query.id,
 								[
@@ -481,7 +485,7 @@ export default class TelegramBot extends TelegramApi {
 								],
 								0
 							)
-						: this.sendMessage(update.message?.chat.id ?? 0, message, "HTML"))(
+						: this.sendMessage(isMessageUpdate(update) ? update.message.chat.id : 0, message, "HTML"))(
 					joke_response.joke ??
 						`${joke_response.setup}\n\n<tg-spoiler>${joke_response.delivery}</tg-spoiler>`
 				)
@@ -493,13 +497,13 @@ export default class TelegramBot extends TelegramApi {
 			.then((response) => response.json())
 			.then((json) => json as [string])
 			.then((shibe_response) =>
-				update.inline_query
+				isInlineQueryUpdate(update)
 					? this.answerInlineQuery(
 							update.inline_query.id,
 							[new TelegramInlineQueryResultPhoto(shibe_response[0])],
 							0
 						)
-					: this.sendPhoto(update.message?.chat.id ?? 0, shibe_response[0])
+					: this.sendPhoto(isMessageUpdate(update) ? update.message.chat.id : 0, shibe_response[0])
 			);
 
 	// bot command: /bored
@@ -508,14 +512,14 @@ export default class TelegramBot extends TelegramApi {
 			.then((response) => responseToJSON(response))
 			.then((json) => json as Bored)
 			.then((bored_response) =>
-				update.inline_query
+				isInlineQueryUpdate(update)
 					? this.answerInlineQuery(
 							update.inline_query.id,
 							[new TelegramInlineQueryResultArticle(bored_response.activity)],
 							0
 						)
 					: this.sendMessage(
-							update.message?.chat.id ?? 0,
+							isMessageUpdate(update) ? update.message.chat.id : 0,
 							bored_response.activity
 						)
 			);
@@ -523,13 +527,13 @@ export default class TelegramBot extends TelegramApi {
 	// bot command: /epoch
 	epoch = async (update: TelegramUpdate): Promise<Response> =>
 		((seconds) =>
-			update.inline_query
+			isInlineQueryUpdate(update)
 				? this.answerInlineQuery(
 						update.inline_query.id,
 						[new TelegramInlineQueryResultArticle(seconds)],
 						0
 					)
-				: this.sendMessage(update.message?.chat.id ?? 0, seconds))(
+				: this.sendMessage(isMessageUpdate(update) ? update.message.chat.id : 0, seconds))(
 			Math.floor(Date.now() / 1000).toString()
 		);
 
@@ -543,24 +547,26 @@ export default class TelegramBot extends TelegramApi {
 	// bot command: /roll
 	roll = async (update: TelegramUpdate, args: string[]): Promise<Response> =>
 		((outcome, message) =>
-			update.inline_query
+			isInlineQueryUpdate(update)
 				? this.answerInlineQuery(update.inline_query.id, [
 						new TelegramInlineQueryResultArticle(
 							message(
-								update.inline_query.from.username,
+								update.inline_query.from.username ?? "",
 								update.inline_query.from.first_name,
 								outcome
 							)
 						),
 					])
-				: this.sendMessage(
-						update.message?.chat.id ?? 0,
-						message(
-							update.message?.from.username ?? "",
-							update.message?.from.first_name ?? "",
-							outcome
+				: isMessageUpdate(update)
+					? this.sendMessage(
+							update.message.chat.id,
+							message(
+								update.message.from.username?? "",
+								update.message.from.first_name ?? "",
+								outcome
+							)
 						)
-					))(
+					: this.updates.default)(
 			Math.floor(Math.random() * (parseInt(args[1]) || 6 - 1 + 1) + 1),
 			(username: string, first_name: string, outcome: number) =>
 				`${first_name ?? username} rolled a ${
@@ -571,7 +577,7 @@ export default class TelegramBot extends TelegramApi {
 	// bot command: /commandList
 	commandList = async (update: TelegramUpdate): Promise<Response> =>
 		this.sendMessage(
-			update.message?.chat.id ?? 0,
+			isMessageUpdate(update) ? update.message.chat.id : 0,
 			`${Object.keys(this.commands).join("\n")}`,
 			"HTML"
 		);
@@ -579,22 +585,180 @@ export default class TelegramBot extends TelegramApi {
 	// bot command: /toss
 	toss = async (update: TelegramUpdate): Promise<Response> =>
 		this.sendMessage(
-			update.message?.chat.id ?? 0,
+			isMessageUpdate(update) ? update.message.chat.id : 0,
 			Math.floor(Math.random() * 2) == 0 ? "heads" : "tails"
 		);
 
 	// bot command: /ping
 	ping = async (update: TelegramUpdate, args: string[]): Promise<Response> =>
 		this.sendMessage(
-			update.message?.chat.id ?? 0,
+			isMessageUpdate(update) ? update.message.chat.id : 0,
 			args.length === 1 ? "pong" : args.slice(1).join(" ")
 		);
 
 	// bot command: /chatInfo
 	getChatInfo = async (update: TelegramUpdate): Promise<Response> =>
 		this.sendMessage(
-			update.message?.chat.id ?? 0,
-			preTagString(prettyJSON(update.message?.chat ?? 0)),
+			isMessageUpdate(update) ? update.message.chat.id : 0,
+			preTagString(prettyJSON(isMessageUpdate(update) ? update.message.chat : 0)),
 			"HTML"
 		);
+
+	// bot command: /decor
+	decor = async (
+		update: TelegramUpdate,
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		args: string[]
+	): Promise<Response> => {
+
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const selectDB = await (async () => {
+			if (this.db) {
+				const result = await this.db
+					.prepare("SELECT content FROM Messages WHERE userId=?")
+					.bind(
+						isInlineQueryUpdate(update)
+							? update.inline_query.from.id
+							: isMessageUpdate(update) ? update.message.chat.id : 0
+					)
+					.first() ?? "";
+				return result;
+			}
+		});
+
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const updateDB = await (async (content: string) => {
+			if (this.db) {
+				const { success } = await this.db
+					.prepare("UPDATE Decor SET content=? WHERE userId=?")
+					.bind(
+						content,
+						isInlineQueryUpdate(update)
+							? update.inline_query.from.id
+							: isMessageUpdate(update) ? update.message.chat.id : 0,
+							content
+					)
+					.run();
+
+				if (!success) {
+					console.log("failed to update data into d1");
+				}
+		
+				return success;
+			}
+		});
+
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const insertDB = await (async (content: string) => {
+			if (this.db) {
+				const { success } = await this.db
+					.prepare("INSERT INTO Decor (userId, content) VALUES (?, ?)")
+					.bind(
+						isInlineQueryUpdate(update)
+							? update.inline_query.from.id
+							: isMessageUpdate(update) ? update.message.chat.id : 0,
+						content
+					)
+					.run();
+
+				if (!success) {
+					console.log("failed to insert data into d1");
+				}
+		
+				return success;
+			}
+		});
+
+
+		// چیدمان مورد علاقه ات را انتخاب کن؟
+		// چیدمان ساده و ارزان
+		// چیدمان گران و تجملاتی
+		
+		// Read DB
+		// Image Generator
+		
+		// نوع روشنایی مورد نظرت را انتخاب کن؟
+		// روشنایی لوستر
+		// روشنایی چراغ سقفی
+		// روشنایی لامپ ال ای دی
+		
+		// Read DB
+		// Save DB
+		// Reply with previous question
+		
+		// متراژ مورد نظرت را انتخاب کن؟
+		// متراژ کوچک
+		// متراژ متوسط
+		// متراژ بزرگ
+		// متراژ خیلی بزرگ
+		
+		// Read DB
+		// Save DB
+		// Reply with previous question
+		
+		// ...
+		
+		// نوع کابینت مورد نظرت رو انتخاب کن؟
+		// کابینت با جزیره
+		// کابینت بدون جزیره
+		
+		// نوع تخت مورد نظرت رو انتخاب کن؟
+		// تخت یک نفره
+		// تخت دو نفره
+		
+		// نوع مبلمان مورد نظرت رو انتخاب کن؟
+		// مبلمان چهار نفره
+		// مبلمان شش نفره
+		// مبلمان هشت نفره
+		
+		// ...
+		
+		// Read DB
+		// Save DB
+		// Reply with previous question
+		
+		// اتاق مورد نظرت رو انتخاب کن؟
+		// اتاق آشپزخانه
+		// اتاق خواب
+		// اتاق نشیمن
+		// اتاق کلوزت
+		
+		// Read DB
+		// Save DB
+		// Reply with previous question
+		
+		// سبک مورد علاقه ات را انتخاب کن؟
+		// سبک روستیک
+		// سبک ساحلی
+		// سبک مدرن
+		// سبک اسکاندیناوی
+		// سبک صنعتی
+		// سبک معاصر
+		// سبک سنتی
+		
+		// Read DB
+		// Save DB
+		// Reply with previous question
+
+		const response = "HI from decor!"
+
+		await insertDB(response)
+		
+		if (isInlineQueryUpdate(update)) {
+			return this.answerInlineQuery(update.inline_query.id, [
+				new TelegramInlineQueryResultArticle(response),
+			]);
+		} else if (isMessageUpdate(update)) {
+			return this.sendMessage(
+				update.message.chat.id,
+				response,
+				"",
+				false,
+				false,
+				update.message.message_id
+			);
+		}
+
+		return this.updates.default
+	};
 }

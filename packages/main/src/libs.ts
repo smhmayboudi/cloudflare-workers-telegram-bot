@@ -1,3 +1,5 @@
+import { TelegramChatPublic as TelegramPublicChat, TelegramChat, TelegramMessage, TelegramUpdate, Update } from "./types"
+
 export const sha256 = async (text: string): Promise<string> =>
 	crypto.subtle
 		.digest("SHA-256", new TextEncoder().encode(text))
@@ -55,3 +57,18 @@ export const fetch_json = async (url: URL): Promise<Response> =>
 	fetch(url.href)
 		.then((response) => responseToJSON(response))
 		.then((json) => JSONResponse(json));
+
+export const isInlineQueryUpdate = (update: Update): update is TelegramUpdate.InlineQueryUpdate =>
+    (update as TelegramUpdate.InlineQueryUpdate).inline_query !== undefined;
+
+export const isMessageUpdate = (update: Update): update is TelegramUpdate.MessageUpdate =>
+    (update as TelegramUpdate.MessageUpdate).message !== undefined;
+
+export const isNewChatMembersMessage = (update: Update): update is TelegramMessage.NewChatMembersMessage =>
+    (update as TelegramMessage.NewChatMembersMessage).new_chat_members !== undefined;
+
+export const isTelegramPublicChat = (chat: TelegramChat): chat is TelegramPublicChat => 
+	(chat as TelegramPublicChat).title !== undefined;
+
+export const isTextMessage = (update: Update): update is TelegramMessage.TextMessage =>
+    (update as TelegramMessage.TextMessage).text !== undefined;

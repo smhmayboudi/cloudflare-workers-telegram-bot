@@ -2,7 +2,13 @@ import BotApi from "./bot_api";
 import Handler from "./handler";
 import TelegramBot from "./telegram_bot";
 import Webhook from "./webhook";
-export { Webhook };
+import { Chat as TelegramChat, Message as TelegramMessage, Update as TelegramUpdate } from "@telegraf/types"
+
+export { TelegramChat, TelegramMessage, TelegramUpdate, Webhook };
+
+export type TelegramChatPublic = Exclude<TelegramChat, TelegramChat.PrivateChat>
+
+export type Update = TelegramMessage | TelegramUpdate
 
 export type Command = (
 	bot: BotApi,
@@ -98,29 +104,6 @@ export type TelegramFrom = {
 	username: string;
 };
 
-export type TelegramChat = {
-	id: number;
-	type: string;
-	title?: string;
-	username?: string;
-	first_name?: string;
-	last_name?: string;
-	// photo?: TelegramChatPhoto;
-	bio?: string;
-	has_private_forwards: boolean;
-	description?: string;
-	invite_link?: string;
-	pinned_message?: TelegramMessage;
-	// permissions?: TelegramChatPermissions;
-	slow_mode_delay?: number;
-	message_auto_delete_time?: number;
-	has_protected_content?: boolean;
-	sticker_set_name?: string;
-	can_set_sticker_set?: boolean;
-	linked_chat_id?: number;
-	// location?: TelegramChatLocation;
-};
-
 export type TelegramUser = {
 	id: number;
 	is_bot: boolean;
@@ -150,66 +133,6 @@ export type TelegramPhotoSize = {
 	file_size?: number;
 };
 
-export type TelegramMessage = {
-	message_id: number;
-	from: TelegramFrom;
-	sender_chat?: TelegramChat;
-	date: number;
-	chat: TelegramChat;
-	forward_from?: TelegramUser;
-	forward_from_chat?: TelegramChat;
-	forward_from_message_id?: number;
-	forward_signature?: string;
-	forward_sender_name?: string;
-	forward_date?: number;
-	is_automatic_forward?: boolean;
-	reply_to_message?: TelegramMessage;
-	via_bot?: TelegramUser;
-	edit_date?: number;
-	has_protected_content?: boolean;
-	media_group_id?: string;
-	author_signature?: string;
-	text?: string;
-	entities?: TelegramMessageEntity[];
-	// animation?: TelegramAnimation;
-	// audio?: TelegramAudio;
-	// document?: TelegramDocument;
-	photo?: TelegramPhotoSize[];
-	// sticker?: TelegramSticker;
-	// video?: TelegramVideo;
-	// video_note?: TelegramVideoNote;
-	// voice?: TelegramVoice;
-	caption?: string;
-	caption_entities?: TelegramMessageEntity[];
-	// contact?: TelegramContact;
-	// dice?: TelegramDice;
-	// poll?: TelegramPoll;
-	// venue?: TelegramVenue;
-	// location?: TelegramLocation;
-	new_chat_members?: TelegramUser[];
-	left_chat_member?: TelegramUser;
-	new_chat_title?: string;
-	// new_chat_photo?: TelegramPhotoSize[];
-	delete_chat_photo?: boolean;
-	group_chat_created?: boolean;
-	supergroup_chat_created?: boolean;
-	channel_chat_created?: boolean;
-	// message_auto_delete_timer_changed?: TelegramAutoDeleteTimerChanged;
-	migrate_to_chat_id?: number;
-	migrate_from_chat_id?: number;
-	pinned_message?: TelegramMessage;
-	// invoice?: TelegramInvoice;
-	// successful_payment?: TelegramSuccessfulPayment;
-	connected_website?: string;
-	// passport_data?: TelegramPassportData;
-	// proximity_alert_triggered?: TelegramProximityAlertTriggered;
-	// voice_chat_scheduled?: TelegramVoiceChatScheduled;
-	// voice_chat_started?: TelegramVoiceChatStarted;
-	// voice_chat_ended?: TelegramVoiceChatEnded;
-	// voice_chat_participants_invited?: TelegramVoiceChatParticipantsInvited;
-	// reply_markup?: TelegramInlineKeyboardMarkup;
-};
-
 export type TelegramInputMessageContent = {
 	message_text: string;
 	parse_mode: string;
@@ -222,46 +145,6 @@ export type TelegramInlineQuery = {
 	offset: string;
 	query: string;
 };
-
-export class Update {
-	[key: string]: unknown;
-}
-
-export class TelegramUpdate extends Update {
-	update_id: number;
-	message?: TelegramMessage;
-	edited_message?: TelegramMessage;
-	channel_post?: TelegramMessage;
-	edited_channel_post?: TelegramMessage;
-	inline_query?: TelegramInlineQuery;
-	// chosen_inline_result?: TelegramChosenInlineResult;
-	// callback_query?: TelegramCallbackQuery;
-	// shipping_query?: TelegramShippingQuery;
-	// pre_checkout_query?: TelegramPreCheckoutQuery;
-	// poll?: TelegramPoll;
-	// poll_answer?: TelegramPollAnswer;
-	// my_chat_member?: TelegramChatMemberUpdated;
-	// chat_member?: TelegramChatMemberUpdated;
-	// chat_join_request: TelegramChatJoinRequest;
-	constructor(update: PartialTelegramUpdate) {
-		super();
-		this.update_id = update.update_id || 0;
-		this.message = update.message;
-		this.edited_message = update.edited_message;
-		this.channel_post = update.channel_post;
-		this.edited_channel_post = update.edited_channel_post;
-		this.inline_query = update.inline_query;
-		// chosen_inline_result = update.chosen_inline_result;
-		// callback_query = update.callback_query;
-		// shipping_query = update.shipping_query;
-		// pre_checkout_query = update.pre_checkout_query;
-		// poll = update.poll;
-		// poll_answer = update.poll_answer;
-		// my_chat_member = update.my_chat_member;
-		// chat_member = update.chat_member;
-		// chat_join_request = update.chat_join_request;
-	}
-}
 
 export type PartialTelegramUpdate = {
 	update_id?: number;

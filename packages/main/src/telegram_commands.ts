@@ -25,4 +25,7 @@ export default class TelegramCommands {
 		bot.image(update, args);
 	static translate: TelegramCommand = async (bot, update, args) =>
 		bot.translate(update, args);
+
+	static decor: TelegramCommand = async (bot, update, args) =>
+		bot.decor(update, args);
 }

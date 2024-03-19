@@ -1,5 +1,5 @@
 {
-	"name": "@codebam/cf-workers-telegram-bot",
+	"name": "@smhmayboudi/cloudflare-workers-telegram-bot",
 	"version": "5.14.0",
 	"description": "serverless telegram bot on cf workers",
 	"main": "./dist/main/src/main.js",
@@ -26,10 +26,11 @@
 	"license": "Apache-2.0",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/codebam/cf-workers-telegram-bot.git"
+		"url": "https://github.com/smhmayboudi/cloudflare-workers-telegram-bot.git"
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20240222.0",
+		"@telegraf/types": "^7.1.0",
 		"@typescript-eslint/eslint-plugin": "^7.0.2",
 		"@typescript-eslint/parser": "^7.0.2",
 		"eslint": "^8.57.0",

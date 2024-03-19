@@ -1,6 +1,6 @@
 # cf-workers-telegram-bot
 
-[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/codebam/cf-workers-telegram-bot)
+[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/smhmayboudi/cloudflare-workers-telegram-bot)
 
 ![screenshot of cf-workers-telegram-bot](/screenshot.png)
 
@@ -38,7 +38,7 @@ To fork this repo and use wrangler:
 - `wrangler secret put SECRET_TELEGRAM_API_TOKEN` and set it to your telegram
   bot token
 - `wrangler d1 create llama2`
-- put the database block from the command in your wrangler.toml
+- put the database block from the command in your wrangler.toml 50100bde-090c-4cb8-bcf6-e6b6176b6534
 - `wrangler d1 execute llama2 --file ./schema.sql`
 - `wrangler deploy`
 - Done!
@@ -51,7 +51,7 @@ of the following.
 - sha256sum(YourTelegramSecretKey) is the path to your webhook commands and
   should be put at the end of your worker URL to access commands such as
   setting your webhook
-- Use `echo -n yoursecretkey | sha256sum` to get the path
+- Use `echo -n 123 | shasum -a 256` to get the path
 - Open the Cloudflare Worker Logs under **Workers &gt; cf-workers-telegram-bot
   &gt; Logs &gt; Begin log stream** and make a GET request (open it in your browser)
   to your Worker URL and look at the logs to see your Access URL
@@ -59,5 +59,4 @@ of the following.
   a GET request to your Worker URL
 
 Example URL for setting the Webhook and dropping pending updates:
-
-`https://cf-workers-telegram-bot.codebam.workers.dev/a948904f2f0f479b8f8197694b30184b0d2ed1c1cd2a1ec0fb85d299a192a447?command=set`
+`https://cf-workers-telegram-bot.smhmayboudi.workers.dev/123?command=set`

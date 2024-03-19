@@ -6,7 +6,7 @@ import {
 	Webhook,
 	Update,
 } from "./types";
-import { addSearchParams, log } from "./libs";
+import { addSearchParams, log, isInlineQueryUpdate, isTextMessage, isNewChatMembersMessage, isMessageUpdate, isTelegramPublicChat } from "./libs";
 import Handler from "./handler";
 
 export default class TelegramApi extends BotApi {
@@ -17,8 +17,8 @@ export default class TelegramApi extends BotApi {
 	inlineQueryUpdate = async (update: TelegramUpdate): Promise<Response> =>
 		this.executeInlineCommand(update);
 
-	messageUpdate = async (update: TelegramUpdate): Promise<Response> =>
-		typeof update.message?.text === "string"
+	messageUpdate = async (update: Update): Promise<Response> =>
+		isTextMessage(update)
 			? this.executeCommand(update).then(async () => this.greetUsers(update))
 			: this.updates.default;
 
@@ -31,13 +31,13 @@ export default class TelegramApi extends BotApi {
 	update = async (update: Update): Promise<Response> => {
 		console.log({ update });
 		if (update) {
-			if (update.inline_query) {
-				if ((update.inline_query as TelegramUpdate).query !== "") {
-					return this.updates.inline_query(update as TelegramUpdate);
+			if (isInlineQueryUpdate(update)) {
+				if (update.inline_query.query !== "") {
+					return this.updates.inline_query(update);
 				}
 			} else {
-				if (update.message) {
-					return this.updates.message(update as TelegramUpdate);
+				if (isTextMessage(update)) {
+					return this.updates.message(update);
 				}
 			}
 		}
@@ -45,8 +45,8 @@ export default class TelegramApi extends BotApi {
 	};
 
 	// greet new users who join
-	greetUsers = async (update: TelegramUpdate): Promise<Response> =>
-		update.message?.new_chat_members
+	greetUsers = async (update: Update): Promise<Response> =>
+		isMessageUpdate(update) && isNewChatMembersMessage(update) && isTelegramPublicChat(update.message.chat)
 			? this.sendMessage(
 					update.message.chat.id,
 					`Welcome to ${update.message.chat.title}, ${update.message.from.username}`
@@ -57,7 +57,7 @@ export default class TelegramApi extends BotApi {
 
 	// run command passed from executeCommand
 	_executeCommand = async (
-		update: TelegramUpdate,
+		update: Update,
 		text: string,
 		args: string[] = []
 	) =>
@@ -86,25 +86,25 @@ export default class TelegramApi extends BotApi {
 
 	// execute the inline custom bot commands from bot configurations
 	executeInlineCommand = async (update: TelegramUpdate): Promise<Response> =>
-		this._executeCommand(update, update.inline_query?.query ?? "").then(
+		this._executeCommand(update, isInlineQueryUpdate(update) ? update.inline_query.query : "").then(
 			async (command_response) =>
 				command_response
 					? this._executeCommand(
 							update,
 							"inline",
-							update.inline_query?.query.trimStart().split(" ")
+							isInlineQueryUpdate(update) ? update.inline_query.query.trimStart().split(" ") : [""]
 						).then((_command_response) => _command_response)
 					: this.updates.default
 		);
 
 	// execute the custom bot commands from bot configurations
-	executeCommand = async (update: TelegramUpdate): Promise<Response> =>
-		this._executeCommand(update, update.message?.text ?? "") ??
+	executeCommand = async (update: Update): Promise<Response> =>
+		this._executeCommand(update, isTextMessage(update) ? update.text : "") ??
 		this.updates.default;
 
 	// trigger answerInlineQuery command of BotAPI
 	answerInlineQuery = async (
-		inline_query_id: number,
+		inline_query_id: string,
 		results: TelegramInlineQueryResult[],
 		cache_time = 0
 	) =>
