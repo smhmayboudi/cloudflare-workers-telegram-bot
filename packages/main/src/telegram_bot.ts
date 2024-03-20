@@ -6,13 +6,13 @@ import {
 	responseToJSON,
 	isInlineQueryUpdate,
 	isMessageUpdate,
+	newTelegramInlineQueryResultArticle,
+	newTelegramInlineQueryResultPhoto,
 } from "./libs";
 import TelegramApi from "./telegram_api";
 import {
 	Joke,
 	Bored,
-	TelegramInlineQueryResultArticle,
-	TelegramInlineQueryResultPhoto,
 	TelegramUpdate,
 	Config,
 	DDGQueryResponse,
@@ -73,10 +73,10 @@ export default class TelegramBot extends TelegramApi {
 					source_lang: lang,
 					target_lang: "english",
 				});
-				return new TelegramInlineQueryResultArticle(
+				return newTelegramInlineQueryResultArticle(
 					response.translated_text ?? "",
-					`${lang}: ${response.translated_text}`
-				);
+					`${lang}: ${response.translated_text}`,
+				)
 			})
 		);
 		return this.answerInlineQuery(
@@ -99,7 +99,7 @@ export default class TelegramBot extends TelegramApi {
 		if (success) {
 			if (isInlineQueryUpdate(update)) {
 				return this.answerInlineQuery(update.inline_query.id, [
-					new TelegramInlineQueryResultArticle("_"),
+					newTelegramInlineQueryResultArticle("_"),
 				]);
 			}
 			return this.sendMessage(isMessageUpdate(update) ? update.message.chat.id : 0, "_");
@@ -228,7 +228,7 @@ export default class TelegramBot extends TelegramApi {
 
 		if (isInlineQueryUpdate(update)) {
 			return this.answerInlineQuery(update.inline_query.id, [
-				new TelegramInlineQueryResultArticle(response),
+				newTelegramInlineQueryResultArticle(response),
 			]);
 		}
 		return this.sendMessage(
@@ -332,7 +332,7 @@ export default class TelegramBot extends TelegramApi {
 
 		if (isInlineQueryUpdate(update)) {
 			return this.answerInlineQuery(update.inline_query.id, [
-				new TelegramInlineQueryResultArticle(response),
+				newTelegramInlineQueryResultArticle(response),
 			]);
 		} else if (isMessageUpdate(update)) {
 			return this.sendMessage(
@@ -352,7 +352,7 @@ export default class TelegramBot extends TelegramApi {
 		((url) =>
 			isInlineQueryUpdate(update)
 				? this.answerInlineQuery(update.inline_query.id, [
-						new TelegramInlineQueryResultArticle(url),
+						newTelegramInlineQueryResultArticle(url),
 					])
 				: this.sendMessage(isMessageUpdate(update) ? update.message.chat.id : 0, url))(
 			"https://github.com/smhmayboudi/cloudflare-workers-telegram-bot"
@@ -367,7 +367,7 @@ export default class TelegramBot extends TelegramApi {
 			((duckduckgo_url) =>
 				isInlineQueryUpdate(update) && query === ""
 					? this.answerInlineQuery(update.inline_query.id, [
-							new TelegramInlineQueryResultArticle("https://duckduckgo.com"),
+							newTelegramInlineQueryResultArticle("https://duckduckgo.com"),
 						])
 					: isInlineQueryUpdate(update)
 						? fetch(
@@ -391,7 +391,7 @@ export default class TelegramBot extends TelegramApi {
 												isInlineQueryUpdate(update) ? update.inline_query.id : "0",
 												instant_answer_url !== ""
 													? [
-															new TelegramInlineQueryResultArticle(
+															newTelegramInlineQueryResultArticle(
 																`${instant_answer_url}\n\n<a href="${
 																	addSearchParams(new URL(duckduckgo_url), {
 																		q: args
@@ -404,18 +404,18 @@ export default class TelegramBot extends TelegramApi {
 																"HTML",
 																thumb_url
 															),
-															new TelegramInlineQueryResultArticle(
+															newTelegramInlineQueryResultArticle(
 																duckduckgo_url,
 																duckduckgo_url,
-																"",
+																"Markdown",
 																default_thumb_url
 															),
 														]
 													: [
-															new TelegramInlineQueryResultArticle(
+															newTelegramInlineQueryResultArticle(
 																duckduckgo_url,
 																duckduckgo_url,
-																"",
+																"Markdown",
 																default_thumb_url
 															),
 														],
@@ -458,7 +458,7 @@ export default class TelegramBot extends TelegramApi {
 				((message) =>
 					isInlineQueryUpdate(update)
 						? this.answerInlineQuery(update.inline_query.id, [
-								new TelegramInlineQueryResultArticle(message),
+								newTelegramInlineQueryResultArticle(message),
 							])
 						: this.sendMessage(isMessageUpdate(update) ? update.message.chat.id : 0, message))(
 					`Kanye says... ${json.quote}`
@@ -477,7 +477,7 @@ export default class TelegramBot extends TelegramApi {
 						? this.answerInlineQuery(
 								update.inline_query.id,
 								[
-									new TelegramInlineQueryResultArticle(
+									newTelegramInlineQueryResultArticle(
 										message,
 										joke_response.joke ?? joke_response.setup,
 										"HTML"
@@ -500,7 +500,7 @@ export default class TelegramBot extends TelegramApi {
 				isInlineQueryUpdate(update)
 					? this.answerInlineQuery(
 							update.inline_query.id,
-							[new TelegramInlineQueryResultPhoto(shibe_response[0])],
+							[newTelegramInlineQueryResultPhoto(shibe_response[0])],
 							0
 						)
 					: this.sendPhoto(isMessageUpdate(update) ? update.message.chat.id : 0, shibe_response[0])
@@ -515,7 +515,7 @@ export default class TelegramBot extends TelegramApi {
 				isInlineQueryUpdate(update)
 					? this.answerInlineQuery(
 							update.inline_query.id,
-							[new TelegramInlineQueryResultArticle(bored_response.activity)],
+							[newTelegramInlineQueryResultArticle(bored_response.activity)],
 							0
 						)
 					: this.sendMessage(
@@ -530,7 +530,7 @@ export default class TelegramBot extends TelegramApi {
 			isInlineQueryUpdate(update)
 				? this.answerInlineQuery(
 						update.inline_query.id,
-						[new TelegramInlineQueryResultArticle(seconds)],
+						[newTelegramInlineQueryResultArticle(seconds)],
 						0
 					)
 				: this.sendMessage(isMessageUpdate(update) ? update.message.chat.id : 0, seconds))(
@@ -549,7 +549,7 @@ export default class TelegramBot extends TelegramApi {
 		((outcome, message) =>
 			isInlineQueryUpdate(update)
 				? this.answerInlineQuery(update.inline_query.id, [
-						new TelegramInlineQueryResultArticle(
+						newTelegramInlineQueryResultArticle(
 							message(
 								update.inline_query.from.username ?? "",
 								update.inline_query.from.first_name,
@@ -746,7 +746,7 @@ export default class TelegramBot extends TelegramApi {
 		
 		if (isInlineQueryUpdate(update)) {
 			return this.answerInlineQuery(update.inline_query.id, [
-				new TelegramInlineQueryResultArticle(response),
+				newTelegramInlineQueryResultArticle(response),
 			]);
 		} else if (isMessageUpdate(update)) {
 			return this.sendMessage(

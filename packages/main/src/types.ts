@@ -2,11 +2,28 @@ import BotApi from "./bot_api";
 import Handler from "./handler";
 import TelegramBot from "./telegram_bot";
 import Webhook from "./webhook";
-import { Chat as TelegramChat, Message as TelegramMessage, Update as TelegramUpdate } from "@telegraf/types"
+import {
+	Chat as TelegramChat,
+	InlineQueryResult as TelegramInlineQueryResult,
+	InlineQueryResultArticle as TelegramInlineQueryResultArticle,
+	InlineQueryResultPhoto as TelegramInlineQueryResultPhoto,
+	Message as TelegramMessage,
+	Update as TelegramUpdate,
+	ParseMode as TelegramParseMode
+} from "@telegraf/types"
 
-export { TelegramChat, TelegramMessage, TelegramUpdate, Webhook };
+export { 
+	TelegramChat,
+	TelegramInlineQueryResult,
+	TelegramInlineQueryResultArticle,
+	TelegramInlineQueryResultPhoto,
+	TelegramMessage,
+	TelegramParseMode,
+	TelegramUpdate,
+	Webhook
+};
 
-export type TelegramChatPublic = Exclude<TelegramChat, TelegramChat.PrivateChat>
+export type TelegramPublicChat = Exclude<TelegramChat, TelegramChat.PrivateChat>
 
 export type Update = TelegramMessage | TelegramUpdate
 
@@ -57,7 +74,7 @@ export class Config {
 
 export const localhost = new URL("http://localhost");
 
-export class WebhookCommands {
+export type WebhookCommands = {
 	[key: string]: () => Promise<Response>;
 }
 
@@ -90,133 +107,6 @@ export type Bored = {
 	key: string;
 	accessibility: 0;
 };
-
-export type Balance = Record<
-	string,
-	{ final_balance: number; n_tx: number; total_received: number }
->;
-
-export type TelegramFrom = {
-	first_name: string;
-	id: number;
-	is_bot: boolean;
-	language_code: string;
-	username: string;
-};
-
-export type TelegramUser = {
-	id: number;
-	is_bot: boolean;
-	first_name: string;
-	last_name?: string;
-	username?: string;
-	language_code?: string;
-	can_join_groups?: boolean;
-	can_read_all_group_messages?: boolean;
-	supports_inline_queries: boolean;
-};
-
-export type TelegramMessageEntity = {
-	type: string;
-	offset: number;
-	length: number;
-	url?: string;
-	user?: TelegramUser;
-	language?: string;
-};
-
-export type TelegramPhotoSize = {
-	file_id: string;
-	file_unique_id: string;
-	width: number;
-	height: number;
-	file_size?: number;
-};
-
-export type TelegramInputMessageContent = {
-	message_text: string;
-	parse_mode: string;
-};
-
-export type TelegramInlineQuery = {
-	chat_type: "sender" | "private" | "group" | "supergroup" | "channel";
-	from: TelegramFrom;
-	id: number;
-	offset: string;
-	query: string;
-};
-
-export type PartialTelegramUpdate = {
-	update_id?: number;
-	message?: TelegramMessage;
-	edited_message?: TelegramMessage;
-	channel_post?: TelegramMessage;
-	edited_channel_post?: TelegramMessage;
-	inline_query?: TelegramInlineQuery;
-};
-
-export type TelegramInlineQueryType =
-	| "article"
-	| "photo"
-	| "gif"
-	| "mpeg4_gif"
-	| "video"
-	| "audio"
-	| "voice"
-	| "document"
-	| "location"
-	| "venue"
-	| "contact"
-	| "game"
-	| "sticker";
-
-export class TelegramInlineQueryResult {
-	type: TelegramInlineQueryType;
-	id: string;
-	constructor(type: TelegramInlineQueryType) {
-		this.type = type;
-		this.id = crypto.randomUUID();
-	}
-}
-
-export class TelegramInlineQueryResultPhoto extends TelegramInlineQueryResult {
-	photo_url: string; // must be a jpg
-	thumb_url: string;
-	photo_width?: number;
-	photo_height?: number;
-	title?: string;
-	description?: string;
-	caption?: string;
-	parse_mode?: string;
-	caption_entities?: string;
-	// reply_markup?: TelegramInlineKeyboardMarkup;
-	// input_message_content?: TelegramInputMessageContent;
-	constructor(photo: string) {
-		super("photo");
-		this.photo_url = photo;
-		this.thumb_url = photo;
-	}
-}
-
-export class TelegramInlineQueryResultArticle extends TelegramInlineQueryResult {
-	title: string;
-	input_message_content: TelegramInputMessageContent;
-	thumb_url: string;
-	constructor(
-		content: string,
-		title = content,
-		parse_mode = "",
-		thumb_url = ""
-	) {
-		super("article");
-		this.title = title;
-		this.input_message_content = {
-			message_text: content.toString(),
-			parse_mode,
-		};
-		this.thumb_url = thumb_url;
-	}
-}
 
 export type DDGQueryResponse = {
 	AbstractSource: string;

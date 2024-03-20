@@ -1,4 +1,4 @@
-import { TelegramChatPublic as TelegramPublicChat, TelegramChat, TelegramMessage, TelegramUpdate, Update } from "./types"
+import { TelegramPublicChat, TelegramChat, TelegramMessage, TelegramUpdate, Update, TelegramParseMode, TelegramInlineQueryResultArticle, TelegramInlineQueryResultPhoto } from "./types"
 
 export const sha256 = async (text: string): Promise<string> =>
 	crypto.subtle
@@ -71,4 +71,29 @@ export const isTelegramPublicChat = (chat: TelegramChat): chat is TelegramPublic
 	(chat as TelegramPublicChat).title !== undefined;
 
 export const isTextMessage = (update: Update): update is TelegramMessage.TextMessage =>
-    (update as TelegramMessage.TextMessage).text !== undefined;
+    typeof (update as TelegramMessage.TextMessage).text !== "string";
+
+export const newTelegramInlineQueryResultArticle = (
+		content: string,
+		title = content,
+		parse_mode = "HTML" as TelegramParseMode,
+		thumbnail_url = "",
+	): TelegramInlineQueryResultArticle => ({
+		id: crypto.randomUUID(),
+		input_message_content: {
+			message_text: content.toString(),
+			parse_mode: parse_mode
+		},
+		thumbnail_url: thumbnail_url,
+		title: title,
+		type: "article",
+	})
+
+export const newTelegramInlineQueryResultPhoto = (
+		photo: string,
+	): TelegramInlineQueryResultPhoto => ({
+		id: crypto.randomUUID(),
+		photo_url: photo,
+		thumbnail_url: photo,
+		type: "photo",
+	})
