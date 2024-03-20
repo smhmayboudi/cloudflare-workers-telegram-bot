@@ -74,7 +74,7 @@ export class Config {
 
 export const localhost = new URL("http://localhost");
 
-export type WebhookCommands = {
+export class WebhookCommands {
 	[key: string]: () => Promise<Response>;
 }
 

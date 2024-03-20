@@ -70,8 +70,8 @@ export const isNewChatMembersMessage = (update: Update): update is TelegramMessa
 export const isTelegramPublicChat = (chat: TelegramChat): chat is TelegramPublicChat => 
 	(chat as TelegramPublicChat).title !== undefined;
 
-export const isTextMessage = (update: Update): update is TelegramMessage.TextMessage =>
-    typeof (update as TelegramMessage.TextMessage).text !== "string";
+export const isTextMessage = (update: TelegramMessage.ServiceMessage): update is TelegramMessage.TextMessage =>
+	(update as TelegramMessage.TextMessage).text !== undefined;
 
 export const newTelegramInlineQueryResultArticle = (
 		content: string,

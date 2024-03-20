@@ -13,6 +13,7 @@ export default class Handler {
 		_request?: Request,
 		_bot?: BotApi
 	): Promise<Response> => {
+		console.log({ "func": "getResponse", _request, _bot })
 		this.getAccessKeys(this.configs).then((access_keys) =>
 			Object.keys(access_keys).forEach((key) =>
 				log(
@@ -32,14 +33,21 @@ export default class Handler {
 	postResponse = async (
 		_request?: Request,
 		_bot?: BotApi
-	): Promise<Response> =>
-		_bot?.webhook.token === ""
+	): Promise<Response> => {
+		console.log({ "func": "postResponse", _request, _bot })
+		return _bot?.webhook.token === ""
 			? this.responses.default()
 			: _request
 				? _request
 						.json()
 						.then((update) => (_bot as BotApi).update(update as Update))
 				: this.responses.default();
+	}
+
+	default = async (): Promise<Response> => {
+		console.log({ "func": "default handler" })
+		return new Response()
+	}
 
 	responses: Record<
 		string,
@@ -47,24 +55,27 @@ export default class Handler {
 	> = {
 		GET: this.getResponse,
 		POST: this.postResponse,
-		default: () => new Promise(() => new Response()),
+		default: this.default,
 	};
 
 	getAccessKeys = async (
 		configs: Partial<Config>[]
-	): Promise<Record<string, Config> | Record<string, never>> =>
-		Promise.all(
+	): Promise<Record<string, Config> | Record<string, never>> => {
+		console.log({ "func": "getAccessKeys", configs })
+		return Promise.all(
 			configs.map((bot_config: Partial<Config>) =>
 				sha256(bot_config.webhook?.token ?? "").then((hash) => {
-					console.log(hash);
+					console.log({ hash });
 					return [hash, bot_config];
 				})
 			)
 		).then((result) => Object.fromEntries(result));
+	}
 
 	// handles the request
-	handle = async (request: Request): Promise<Response> =>
-		this.getAccessKeys(this.configs).then((access_keys) =>
+	handle = async (request: Request): Promise<Response> => {
+		console.log({ "func": "handle", request })
+		return this.getAccessKeys(this.configs).then((access_keys) =>
 			Object.keys(this.responses).includes(request.method)
 				? this.responses[request.method](
 						request,
@@ -79,4 +90,5 @@ export default class Handler {
 					)
 				: this.responses.default()
 		);
+	}
 }

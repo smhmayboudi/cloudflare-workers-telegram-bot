@@ -40,9 +40,9 @@ export default {
 					new URL(new URL(request.url).origin)
 				),
 				commands: {
-					default: TelegramCommands.decor as Command,
-					inline: TelegramCommands.decor as Command,
-					"/start": TelegramCommands.decor as Command,
+					default: TelegramCommands.question as Command,
+					inline: TelegramCommands.question as Command,
+					"/start": TelegramCommands.question as Command,
 				},
 				kv: { get_set: env.KV_GET_SET, uid_data: env.KV_UID_DATA },
 				ai: env.AI,

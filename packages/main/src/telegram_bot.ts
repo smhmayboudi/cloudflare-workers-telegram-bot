@@ -74,9 +74,9 @@ export default class TelegramBot extends TelegramApi {
 					target_lang: "english",
 				});
 				return newTelegramInlineQueryResultArticle(
-					response.translated_text ?? "",
-					`${lang}: ${response.translated_text}`,
-				)
+					response.translated_text,
+					`${lang}: ${response.translated_text}`
+				);
 			})
 		);
 		return this.answerInlineQuery(
@@ -344,7 +344,7 @@ export default class TelegramBot extends TelegramApi {
 				update.message.message_id
 			);
 		}
-		return this.updates.default
+		return this.updates.default()
 	};
 
 	// bot command: /code
@@ -427,7 +427,7 @@ export default class TelegramBot extends TelegramApi {
 														ddg_response.Image !== "" && ddg_response.Image
 															? ddg_response.Image
 															: ddg_response.RelatedTopics.length !== 0 &&
-																  ddg_response.RelatedTopics[0].Icon.URL !== ""
+																ddg_response.RelatedTopics[0].Icon.URL !== ""
 																? ddg_response.RelatedTopics[0].Icon.URL
 																: "/i/f96d4798.png"
 													}`
@@ -566,7 +566,7 @@ export default class TelegramBot extends TelegramApi {
 								outcome
 							)
 						)
-					: this.updates.default)(
+					: this.updates.default())(
 			Math.floor(Math.random() * (parseInt(args[1]) || 6 - 1 + 1) + 1),
 			(username: string, first_name: string, outcome: number) =>
 				`${first_name ?? username} rolled a ${
@@ -610,6 +610,7 @@ export default class TelegramBot extends TelegramApi {
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		args: string[]
 	): Promise<Response> => {
+		console.log({ "func": "decor" });
 
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const selectDB = await (async () => {
@@ -759,6 +760,6 @@ export default class TelegramBot extends TelegramApi {
 			);
 		}
 
-		return this.updates.default
+		return this.updates.default()
 	};
 }
