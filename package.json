@@ -1,19 +1,19 @@
 {
-	"name": "root",
-	"private": true,
-	"author": "codebam",
-	"license": "Apache-2.0",
-	"scripts": {
-		"build": "lerna run build",
-		"build:worker": "lerna run build --scope=worker",
-		"release": "lerna version minor -y",
-		"publish": "lerna publish -y from-git",
-		"lint": "lerna run lint"
-	},
-	"workspaces": [
-		"packages/*"
-	],
-	"devDependencies": {
-		"@typescript-eslint/eslint-plugin": "^6.15.0"
-	}
+  "name": "root",
+  "private": true,
+  "author": "codebam",
+  "license": "Apache-2.0",
+  "scripts": {
+    "build": "lerna run build",
+    "build:worker": "lerna run build --scope=worker",
+    "release": "lerna version minor -y",
+    "publish": "lerna publish -y from-git",
+    "lint": "lerna run lint"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.15.0"
+  }
 }

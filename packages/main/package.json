@@ -1,45 +1,45 @@
 {
-	"name": "@smhmayboudi/cloudflare-workers-telegram-bot",
-	"version": "5.14.0",
-	"description": "serverless telegram bot on cf workers",
-	"main": "./dist/main/src/main.js",
-	"module": "./dist/main/src/main.js",
-	"files": [
-		"dist",
-		"LICENSE",
-		"LICENSE_MIT",
-		"README.md"
-	],
-	"keywords": [
-		"cloudflare",
-		"telegram",
-		"worker",
-		"webhook"
-	],
-	"type": "module",
-	"private": false,
-	"scripts": {
-		"build": "tsc --project tsconfig.json",
-		"lint": "eslint src"
-	},
-	"author": "codebam",
-	"license": "Apache-2.0",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/smhmayboudi/cloudflare-workers-telegram-bot.git"
-	},
-	"devDependencies": {
-		"@cloudflare/workers-types": "^4.20240222.0",
-		"@telegraf/types": "^7.1.0",
-		"@typescript-eslint/eslint-plugin": "^7.0.2",
-		"@typescript-eslint/parser": "^7.0.2",
-		"eslint": "^8.57.0",
-		"eslint-config-prettier": "^9.1.0",
-		"lerna": "^8.1.2",
-		"prettier": "^3.2.5",
-		"typescript": "^5.3.3"
-	},
-	"dependencies": {
-		"@cloudflare/ai": "^1.0.50"
-	}
+  "name": "@smhmayboudi/cloudflare-workers-telegram-bot",
+  "version": "5.14.0",
+  "description": "serverless telegram bot on cf workers",
+  "main": "./dist/main/src/main.js",
+  "module": "./dist/main/src/main.js",
+  "files": [
+    "dist",
+    "LICENSE",
+    "LICENSE_MIT",
+    "README.md"
+  ],
+  "keywords": [
+    "cloudflare",
+    "telegram",
+    "worker",
+    "webhook"
+  ],
+  "type": "module",
+  "private": false,
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "lint": "eslint src"
+  },
+  "author": "codebam",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/smhmayboudi/cloudflare-workers-telegram-bot.git"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240222.0",
+    "@telegraf/types": "^7.1.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.2",
+    "@typescript-eslint/parser": "^7.0.2",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "lerna": "^8.1.2",
+    "prettier": "^3.2.5",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@cloudflare/ai": "^1.0.50"
+  }
 }
