@@ -15,11 +15,10 @@ import {
   isTextMessage,
   log,
 } from "./libs";
-import Handler from "./handler";
 
 export default class TelegramApi extends BotApi {
-  constructor(commands: Commands, webhook: Webhook, handler: Handler) {
-    super({ commands, webhook, handler });
+  constructor(commands: Commands, webhook: Webhook) {
+    super({ commands, webhook });
   }
 
   inlineQueryUpdate = async (update: TelegramUpdate): Promise<Response> => {

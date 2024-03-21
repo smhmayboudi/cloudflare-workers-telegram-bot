@@ -1,4 +1,3 @@
-import Handler from "./handler";
 import {
   preTagString,
   prettyJSON,
@@ -36,7 +35,6 @@ export default class TelegramBot extends TelegramApi {
     super(
       config.commands as Commands,
       config.webhook as Webhook,
-      config.handler as Handler,
     );
     this.url = config.url;
     this.kv = config.kv as Kv;

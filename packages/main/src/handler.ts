@@ -84,7 +84,6 @@ export default class Handler {
                 ...new Config(),
                 ...access_keys[key],
                 url: new URL(new URL(request.url).origin), // worker url
-                handler: this,
               });
             })(new URL(request.url).pathname.substring(1)),
           )

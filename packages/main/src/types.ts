@@ -1,5 +1,4 @@
 import BotApi from "./bot_api";
-import Handler from "./handler";
 import TelegramBot from "./telegram_bot";
 import Webhook from "./webhook";
 import {
@@ -53,7 +52,6 @@ export class Config {
   commands: Record<string, Command>;
   kv: Kv;
   url: URL;
-  handler: Handler;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ai: any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -68,7 +66,6 @@ export class Config {
     this.commands = config.commands || {};
     this.kv = config.kv;
     this.url = config.url || new URL(localhost);
-    this.handler = config.handler || new Handler([]);
     this.ai = config.ai;
     this.db = config.db;
     this.r2 = config.r2;
